@@ -52,12 +52,12 @@
 
 /************ ETHERNET STUFF ************/
 byte mac[] = { 0x90, 0xA2, 0xDA, 0x00, 0x4C, 0x64 };
-byte ip[] = { 192,168,1, 100 };
+//byte ip[] = { 192,168,1, 100 };
 EthernetServer server(80);
 
 /************** NTP STUFF ***************/
 unsigned int localPort = 8888;          // local port to listen for UDP packets
-IPAddress timeServer(132, 163, 4, 101); //NIST time server IP address: for more info
+IPAddress timeServer(128, 138, 140, 44);//NIST time server IP address: for more info
                                         //see http://tf.nist.gov/tf-cgi/servers.cgi
 
 const int NTP_PACKET_SIZE= 48; //NTP time stamp is in the first 48 bytes of the message
@@ -81,12 +81,12 @@ configuration config;               //Actually make our config struct
 
 
 // Strings stored in flash mem for the Html Header (saves ram)
-prog_char HeaderOK_0[] PROGMEM = "HTTP/1.1 200 OK";            //
-prog_char HeaderOK_1[] PROGMEM = "Content-Type: text/html";    //
-prog_char HeaderOK_2[] PROGMEM = "";                           //
+const char HeaderOK_0[] PROGMEM = "HTTP/1.1 200 OK";            //
+const char HeaderOK_1[] PROGMEM = "Content-Type: text/html";    //
+const char HeaderOK_2[] PROGMEM = "";                           //
 
 // A table of pointers to the flash memory strings for the header
-PROGMEM const char *HeaderOK_table[] = {   
+const char* const HeaderOK_table[] PROGMEM = {   
   HeaderOK_0,
   HeaderOK_1,
   HeaderOK_2
@@ -105,13 +105,13 @@ void HtmlHeaderOK(EthernetClient client) {
   
   
 // Strings stored in flash mem for the Html 404 Header
-prog_char Header404_0[] PROGMEM = "HTTP/1.1 404 Not Found";     //
-prog_char Header404_1[] PROGMEM = "Content-Type: text/html";    //
-prog_char Header404_2[] PROGMEM = "";                           //
-prog_char Header404_3[] PROGMEM = "<h2>File Not Found!</h2>"; 
+const prog_char Header404_0[] PROGMEM = "HTTP/1.1 404 Not Found";     //
+const prog_char Header404_1[] PROGMEM = "Content-Type: text/html";    //
+const prog_char Header404_2[] PROGMEM = "";                           //
+const prog_char Header404_3[] PROGMEM = "<h2>File Not Found!</h2>"; 
 
 // A table of pointers to the flash memory strings for the header
-PROGMEM const char *Header404_table[] = {   
+const char* const Header404_table[] PROGMEM = {   
   Header404_0,
   Header404_1,
   Header404_2,
@@ -138,41 +138,46 @@ void setup() {
   
   // see if the card is present and can be initialized:
   if (!SD.begin(4)) {
-    Serial.println("Card failed, or not present");
+    //Serial.println("Card failed, or not present");
     // don't do anything more:
     return;
   }
-  Serial.println("card initialized.");
+  //Serial.println("card initialized.");
   
   // The SD card is working, start the server and ethernet related stuff!
-  Ethernet.begin(mac, ip);
+  if (Ethernet.begin(mac) == 0) {
+    //Serial.println("Failed to configure DHCP");
+    // don't do anything more:
+    return;
+  }
+  //Serial.println("DHCP configured!");
+
   server.begin();
   Udp.begin(localPort);
   EEPROM_readAnything(0,config); // make sure our config struct is syncd with EEPROM
 }
-
 
 // A function that takes care of the listing of files for the
 // main page one sees when they first connect to the arduino.
 // it only lists the files in the /data/ folder. Make sure this
 // exists on your SD card.
 void ListFiles(EthernetClient client) {
-  
-  File workingDir = SD.open("/data");
+
+  File workingDir = SD.open("/data/");
   
   client.println("<ul>");
   
     while(true) {
       File entry =  workingDir.openNextFile();
-       if (! entry) {
-         break;
-       }
-       client.print("<li><a href=\"/HC.htm?file=");
-       client.print(entry.name());
-       client.print("\">");
-       client.print(entry.name());
-       client.println("</a></li>");
-       entry.close();
+      if (! entry) {
+        break;
+      }
+      client.print("<li><a href=\"/HC.htm?file=");
+      client.print(entry.name());
+      client.print("\">");
+      client.print(entry.name());
+      client.println("</a></li>");
+      entry.close();
     }
   client.println("</ul>");
   workingDir.close();
