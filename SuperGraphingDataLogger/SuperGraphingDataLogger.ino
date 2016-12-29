@@ -146,7 +146,7 @@ void setup() {
   
   // The SD card is working, start the server and ethernet related stuff!
   if (Ethernet.begin(mac) == 0) {
-    //Serial.println("Failed to configure DHCP");
+    //Serial.println("Failed to configure Ethernet using DHCP");
     // don't do anything more:
     return;
   }
@@ -395,11 +395,12 @@ void loop(){
                       
             HtmlHeaderOK(client);
             
-            int16_t c;
-            while ((c = file.read()) > 0) {
-                // uncomment the serial to debug (slow!)
-                //Serial.print((char)c);
-                client.print((char)c);
+            while(file.available()) {
+              int num_bytes_read;
+              uint8_t byte_buffer[32];
+
+              num_bytes_read=file.read(byte_buffer,32);
+              client.write(byte_buffer,num_bytes_read);
             }
             file.close();
           }
