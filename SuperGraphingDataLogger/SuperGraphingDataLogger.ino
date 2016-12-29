@@ -1,7 +1,7 @@
 /* ************************************************************************
  * ***                    Super Graphing Data Logger                    ***
  * ************************************************************************
- * Everett Robinson, January 2013. More at: http://everettsprojects.com
+ * Everett Robinson, December 2016. More at: http://everettsprojects.com
  *
  * This sketch relies on the SD and ethernet libraries in arduino 1.0 or newer.
  * The following extra non standard libraries were also used, and will need to

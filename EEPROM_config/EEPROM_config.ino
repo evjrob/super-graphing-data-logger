@@ -1,7 +1,7 @@
 /* ************************************************************************
  * ***            Super Graphing Data Logger - EEPROM config            ***
  * ************************************************************************
- * Everett Robinson, December 2012.
+ * Everett Robinson, December 2016.
  *
  * The following extra non standard libraries were used, and will need to be
  * added to the libraries folder:
